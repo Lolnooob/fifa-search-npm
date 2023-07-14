@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV data storage</title>
+    <style>
+        * {
+            font-family: 'Bahnschrift';
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+        card#bronze > img#face {
+            box-shadow: 0px 0px 10px 4px rgb(199 123 48);
+            background: rgb(199 123 48);
+            border-radius: 10px;
+        }
+        card#silver > img#face {
+            box-shadow: 0px 0px 10px 4px rgb(140, 140, 140);
+            background: silver;
+            border-radius: 10px;
+        }
+        card#gold > img#face {
+            box-shadow: 0px 0px 10px 4px rgb(164, 140, 0);
+            background: gold;
+            border-radius: 10px;
+        }
+        card#elite > img#face {
+            box-shadow: 0px 0px 10px 4px rgb(158, 0, 0);
+            background: red;
+            border-radius: 10px;
+        }
+        card#special > img#face {
+            box-shadow: 0px 0px 10px 4px rgb(34, 0, 72);
+            background: rgb(62, 0, 132);
+            border-radius: 10px;
+        }
+        card {
+            position: relative;
+            overflow: hidden;
+        }
+        card > span#name {
+            color: #fff;
+            position: absolute;
+            top: -114px;
+            left: 4px;
+            width: 84px;
+            word-break: break-word;
+        }
+        card > span#ovr {
+            color: #fff;
+            position: absolute;
+            top: -8px;
+            left: 4px;
+            width: 90px;
+        }
+        card > span#pos {
+            color: #fff;
+            position: absolute;
+            top: -9px;
+            right: 4px;
+        }
+        card > img#face {
+            pointer-events: none;
+            user-select: none;
+            width: 128px;
+            height: 128px;
+        }
+        :not(card#special) > span {
+            color: #fff;
+            text-shadow: -1px 1px 0 #000,
+                        1px 1px 0 #000,
+                        1px -1px 0 #000,
+                        -1px -1px 0 #000;
+        }
+        card > img#flag {
+            position: absolute;
+            right: 6px;
+            top: -110px;
+            box-shadow: 0px 0px 10px 2px #000;
+        }
+        card > img#club_flag {
+            position: absolute;
+            right: 6px;
+            top: -80px;
+            width: 32px;
+            height: 32px;
+        }
+        input {
+            padding: 5px;
+            font-size: 15px;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <input type="text" autocomplete="false" id="search">
+    <button onclick="parentNodeId.innerHTML = ''; search(document.getElementById('search'))">Search</button>
+    <button onclick="parentNodeId.innerHTML = ''">Clear</button>
+    <div id="parentNodeId"></div>
+    <script>
+        function newCard(i, j, k, l) {
+            if (extract(i, j, k, "club_position") !== "SUB") {
+                if (extract(i, j, k, "club_position") !== "RES") {
+                    if (j === 0 && k < l+1 && k !== 0 && extract(i, j, k, "short_name").substr(0, 3)[1] === ".") {
+                        let node0 = document.createElement("img");
+                        let node1 = document.createElement("card");
+                        let node2 = document.createElement("span");
+                        let node20 = document.createTextNode(extract(i, j, k, "short_name").substr(3, extract(i, j, k, "short_name").length))
+                        let node3 = document.createElement("span");
+                        let node30 = document.createTextNode(extract(i, j, k, "overall"));
+                        let node4 = document.createElement("span");
+                        let node40 = document.createTextNode(extract(i, j, k, "club_position"));
+                        let node5 = document.createElement("img");
+                        let node6 = document.createElement("img");
+                        node0.id = "face";
+                        node2.id = "name";
+                        node3.id = "ovr";
+                        node4.id = "pos";
+                        node5.id = "flag";
+                        node6.id = "club_flag";
+                        node2.appendChild(node20);
+                        node3.appendChild(node30);
+                        node4.appendChild(node40);
+                        node0.src = extract(i, j, k, "player_face_url");
+                        node5.src = extract(i, j, k, "nation_flag_url");
+                        node6.src = extract(i, j, k, "club_logo_url");
+                        node1.appendChild(node0);
+                        node1.appendChild(node2);
+                        node1.appendChild(node3);
+                        node1.appendChild(node4);
+                        node1.appendChild(node5);
+                        node1.appendChild(node6);
+
+                        if (extract(i, j, k, "overall") >= 89) {
+                            node1.id = "special";
+                        } else if (extract(i, j, k, "overall") > 80) {
+                            node1.id = "gold";
+                        } else if (extract(i, j, k, "overall") > 60) {
+                            node1.id = "silver";
+                        } else if (extract(i, j, k, "overall") > 40) {
+                            node1.id = "bronze";
+                        }
+
+                        document.getElementById("parentNodeId").appendChild(node1);
+                    } else if (j === 0 && k < l+1 && k !== 0) {
+                        let node0 = document.createElement("img");
+                        let node1 = document.createElement("card");
+                        let node2 = document.createElement("span");
+                        let node20 = document.createTextNode(extract(i, j, k, "short_name"))
+                        let node3 = document.createElement("span");
+                        let node30 = document.createTextNode(extract(i, j, k, "overall"));
+                        let node4 = document.createElement("span");
+                        let node40 = document.createTextNode(extract(i, j, k, "club_position"));
+                        let node5 = document.createElement("img");
+                        let node6 = document.createElement("img");
+                        node0.id = "face";
+                        node2.id = "name";
+                        node3.id = "ovr";
+                        node4.id = "pos";
+                        node5.id = "flag";
+                        node6.id = "club_flag";
+                        node2.appendChild(node20);
+                        node3.appendChild(node30);
+                        node4.appendChild(node40);
+                        node0.src = extract(i, j, k, "player_face_url");
+                        node5.src = extract(i, j, k, "nation_flag_url");
+                        node6.src = extract(i, j, k, "club_logo_url");
+                        node1.appendChild(node0);
+                        node1.appendChild(node2);
+                        node1.appendChild(node3);
+                        node1.appendChild(node4);
+                        node1.appendChild(node5);
+                        node1.appendChild(node6);
+
+                        if (extract(i, j, k, "overall") >= 89) {
+                            node1.id = "special";
+                        } else if (extract(i, j, k, "overall") > 80) {
+                            node1.id = "gold";
+                        } else if (extract(i, j, k, "overall") > 60) {
+                            node1.id = "silver";
+                        } else if (extract(i, j, k, "overall") > 40) {
+                            node1.id = "bronze";
+                        }
+
+                        document.getElementById("parentNodeId").appendChild(node1);
+                    }
+                }
+            }
+        }
+        let socket = io();
+        let info = [];
+        let numberPlayers = 20000;
+        socket.emit('display contents')
+        function extract(i, j, k, l) {
+            return i[j][k][i[0][0].indexOf(l)];
+        }
+        socket.on('display contents', (e) => {
+            info.push(e)
+        })
+        function search(e) {
+            for (var col = 0; col < info.length; col++) {
+                for (var playerNo = 0; playerNo < info[col].length; playerNo++) {
+                    if (extract(info, col, playerNo, "short_name").includes(e.value) || extract(info, col, playerNo, "long_name").includes(e.value)) {
+                        newCard(info, col, playerNo, numberPlayers);
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
